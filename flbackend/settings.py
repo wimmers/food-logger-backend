@@ -131,5 +131,6 @@ REST_FRAMEWORK = {
 
 # This should be removed in production as well as the middleware for CORS
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
