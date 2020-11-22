@@ -1,7 +1,7 @@
 # from api.models import Products
 from api.models import Products, Product_To_Node, NotSpottedOn
 from django.contrib.auth.models import User, Group
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -9,6 +9,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from api.serializers import UserSerializer, GroupSerializer,\
     ProductsSerializer, Product_To_NodeSerializer, NotSpottedOnSerializer
+import requests
+import json
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -135,3 +137,15 @@ def filter_products(request):
     return JsonResponse({
         'products': product_ids
     })
+
+@api_view(["POST"])
+def post_single_product(request):
+    received_json_data = json.loads(request.body.decode("utf-8"))
+    barcode = received_json_data.get('barcode', '')
+    product = requests.get('https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json').json()
+
+    product = Products(code = barcode)
+
+    # TODO
+
+    return HttpResponse(status=201)
