@@ -1,5 +1,5 @@
 # from api.models import Products
-from api.models import Products, Product_To_Node
+from api.models import Products, Product_To_Node, NotSpottedOn
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -8,7 +8,7 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from api.serializers import UserSerializer, GroupSerializer,\
-    ProductsSerializer, Product_To_NodeSerializer
+    ProductsSerializer, Product_To_NodeSerializer, NotSpottedOnSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -47,6 +47,11 @@ class Product_To_Node_ViewSet(viewsets.ModelViewSet):
     serializer_class = Product_To_NodeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+class NotSpottedOnViewSet(viewsets.ModelViewSet):
+    queryset = NotSpottedOn.objects.all()
+    serializer_class = NotSpottedOnSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 @api_view(["GET"])
 def get_categories(request):

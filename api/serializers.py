@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from api.models import Products, Product_To_Node
+from api.models import Products, Product_To_Node, SpottedOn, NotSpottedOn
 from rest_framework import serializers
 
 
@@ -40,7 +40,22 @@ class ProductsSerializer(serializers.HyperlinkedModelSerializer):
                   ]
 
 
+class SpottedOnSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SpottedOn
+        fields = ['day', 'product_node_link']
+
+
+class NotSpottedOnSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = NotSpottedOn
+        fields = ['day', 'product_node_link']
+
+
 class Product_To_NodeSerializer(serializers.HyperlinkedModelSerializer):
+    notSpottedOn = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
+    spottedOn = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
+
     class Meta:
         model = Product_To_Node
-        fields = ['code', 'node']
+        fields = ['code', 'node', 'comment', 'created', 'spottedOn', 'notSpottedOn']

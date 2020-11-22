@@ -325,3 +325,15 @@ class Products(models.Model):
 class Product_To_Node(models.Model):
     code = models.IntegerField()
     node = models.IntegerField()
+    comment = models.TextField(default="")
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class SpottedOn(models.Model):
+    day = models.DateField(auto_now_add=True)
+    product_node_link = models.ForeignKey(Product_To_Node, related_name='spottedOn', on_delete=models.CASCADE)
+
+
+class NotSpottedOn(models.Model):
+    day = models.DateField(auto_now_add=True)
+    product_node_link = models.ForeignKey(Product_To_Node, related_name='notSpottedOn', on_delete=models.CASCADE)
