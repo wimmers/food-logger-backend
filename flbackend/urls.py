@@ -24,7 +24,7 @@ router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 router.register(r'products', views.ProductsViewSet)
 router.register(r'product_to_node', views.Product_To_Node_ViewSet)
-router.register(r'not_spotted_on', views.NotSpottedOnViewSet)
+router.register(r'not_spotted_on', views.Not_Spotted_On_View_Set)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

@@ -1,5 +1,5 @@
 # from api.models import Products
-from api.models import Products, Product_To_Node, NotSpottedOn
+from api.models import Products, Product_To_Node, Not_Spotted_On
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
@@ -50,8 +50,8 @@ class Product_To_Node_ViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class NotSpottedOnViewSet(viewsets.ModelViewSet):
-    queryset = NotSpottedOn.objects.all()
+class Not_Spotted_On_View_Set(viewsets.ModelViewSet):
+    queryset = Not_Spotted_On.objects.all()
     serializer_class = NotSpottedOnSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -138,14 +138,35 @@ def filter_products(request):
         'products': product_ids
     })
 
+
 @api_view(["POST"])
 def post_single_product(request):
-    received_json_data = json.loads(request.body.decode("utf-8"))
-    barcode = received_json_data.get('barcode', '')
-    product = requests.get('https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json').json()
+    """
+    expects a json body with "barcode" as single field
+    """
+    barcode = json.loads(request.body.decode("utf-8")).get('barcode', '')
+    request = requests.get('https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json')
+    if request.json()['status_verbose'] == 'product not found':
+        return HttpResponse('Product does not exist in Open Food Facts', status=404)
 
-    product = Products(code = barcode)
+    product = request.json()['product']
 
-    # TODO
+    # for test purposes
+    #Products.objects.filter(code=barcode).delete()
 
-    return HttpResponse(status=201)
+    if not Products.objects.filter(code=barcode).exists():
+
+        list_of_fields = [field.get_attname_column()[1] for field in Products._meta.fields]
+        #list_of_fields.remove('id')
+
+        # remove all fields which are not part of our Products model
+        expected_fields = {key: product[key] for key in list_of_fields if key in product.keys()}
+        expected_fields['url'] = 'https://world.openfoodfacts.org/product/' + str(barcode)
+
+        Products.objects.create(**expected_fields)
+
+        #print(Products.objects.filter(code=barcode).all().values())
+        return HttpResponse(status=201)
+    else:
+        return HttpResponse('Product already in database', status=409)
+

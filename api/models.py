@@ -329,11 +329,11 @@ class Product_To_Node(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
-class SpottedOn(models.Model):
+class Spotted_On(models.Model):
     day = models.DateField(auto_now_add=True)
-    product_node_link = models.ForeignKey(Product_To_Node, related_name='spottedOn', on_delete=models.CASCADE)
+    product_node_link = models.ForeignKey(Product_To_Node, related_name='spotted_on', on_delete=models.CASCADE)
 
 
-class NotSpottedOn(models.Model):
+class Not_Spotted_On(models.Model):
     day = models.DateField(auto_now_add=True)
-    product_node_link = models.ForeignKey(Product_To_Node, related_name='notSpottedOn', on_delete=models.CASCADE)
+    product_node_link = models.ForeignKey(Product_To_Node, related_name='not_spotted_on', on_delete=models.CASCADE)
