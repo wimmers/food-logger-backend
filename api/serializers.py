@@ -28,7 +28,7 @@ class ProductsSerializer(serializers.HyperlinkedModelSerializer):
                   'categories_tags',
                   'stores',
                   'allergens',
-                  'nutriscore_score',
+                  'nutriscore_grade',
                   "image_url",
                   "image_small_url",
                   "image_front_url",
