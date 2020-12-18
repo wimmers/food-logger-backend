@@ -1,5 +1,5 @@
 # from api.models import Products
-from api.models import Products, Product_To_Node, Not_Spotted_On
+from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
@@ -8,7 +8,7 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from api.serializers import UserSerializer, GroupSerializer,\
-    ProductsSerializer, Product_To_NodeSerializer, NotSpottedOnSerializer
+    ProductsSerializer, ProductToNodeSerializer, SpottedOnSerializer, NotSpottedOnSerializer
 import requests
 import json
 
@@ -40,20 +40,27 @@ class ProductsViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class Product_To_Node_ViewSet(viewsets.ModelViewSet):
+class ProductToNodeViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows mappings from products to OSM nodes
     to be viewed or edited.
     """
-    queryset = Product_To_Node.objects.all()
-    serializer_class = Product_To_NodeSerializer
+    queryset = ProductToNode.objects.all()
+    serializer_class = ProductToNodeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class Not_Spotted_On_View_Set(viewsets.ModelViewSet):
-    queryset = Not_Spotted_On.objects.all()
+class SpottedOnViewSet(viewsets.ModelViewSet):
+    queryset = SpottedOn.objects.all()
+    serializer_class = SpottedOnSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class NotSpottedOnViewSet(viewsets.ModelViewSet):
+    queryset = NotSpottedOn.objects.all()
     serializer_class = NotSpottedOnSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 @api_view(["GET"])
 def get_categories(request):
@@ -109,7 +116,7 @@ def filter_shops(request):
         code = Products.objects.get(id=product_id).code
     except Products.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    entries = Product_To_Node.objects.all().\
+    entries = ProductToNode.objects.all().\
         filter(code=code).\
         filter(node__in=node_ids)
     result = [entry.node for entry in entries]
@@ -128,7 +135,7 @@ def filter_products(request):
     Result: a sublist of `products` that are available at at least one of `shops`
     """
     node_ids = request.GET.get('nodes').split(',')
-    entries = Product_To_Node.objects.all().\
+    entries = ProductToNode.objects.all().\
         filter(node__in=node_ids).\
         distinct()
     codes = list(entry.code for entry in entries)

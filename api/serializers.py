@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from api.models import Products, Product_To_Node, Spotted_On, Not_Spotted_On
+from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
 from rest_framework import serializers
 
 
@@ -42,20 +42,20 @@ class ProductsSerializer(serializers.HyperlinkedModelSerializer):
 
 class SpottedOnSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Spotted_On
+        model = SpottedOn
         fields = ['day', 'product_node_link']
 
 
 class NotSpottedOnSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Not_Spotted_On
+        model = NotSpottedOn
         fields = ['day', 'product_node_link']
 
 
-class Product_To_NodeSerializer(serializers.HyperlinkedModelSerializer):
-    notSpottedOn = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
-    spottedOn = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
+class ProductToNodeSerializer(serializers.HyperlinkedModelSerializer):
+    spotted_on = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
+    not_spotted_on = serializers.SlugRelatedField(many=True, read_only=True, slug_field='day')
 
     class Meta:
-        model = Product_To_Node
-        fields = ['code', 'node', 'comment', 'created', 'spotted_on', 'not_spotted_on']
+        model = ProductToNode
+        fields = ['code', 'node', 'created', 'spotted_on', 'not_spotted_on']
