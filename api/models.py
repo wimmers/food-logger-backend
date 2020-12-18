@@ -322,6 +322,17 @@ class Products(models.Model):
         db_table = 'products'
 
 
-class Product_To_Node(models.Model):
+class ProductToNode(models.Model):
     code = models.IntegerField()
     node = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class SpottedOn(models.Model):
+    day = models.DateField(auto_now_add=True)
+    product_node_link = models.ForeignKey(ProductToNode, related_name='spotted_on', on_delete=models.CASCADE)
+
+
+class NotSpottedOn(models.Model):
+    day = models.DateField(auto_now_add=True)
+    product_node_link = models.ForeignKey(ProductToNode, related_name='not_spotted_on', on_delete=models.CASCADE)
