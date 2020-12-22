@@ -215,8 +215,7 @@ def confirm_product_at_shop(request):
     validate_spotted(data)
     link = ProductToNode.objects.get(
         product=data['product'], node=data['node'])
-    spotted = SpottedOn(product_node_link=link)
-    spotted.save()
+    SpottedOn(product_node_link=link).save()
 
     return HttpResponse()
 
@@ -233,7 +232,6 @@ def unconfirm_product_at_shop(request):
     validate_spotted(data)
     link = ProductToNode.objects.get(
         product=data['product'], node=data['node'])
-    spotted = NotSpottedOn(product_node_link=link)
-    spotted.save()
+    NotSpottedOn(product_node_link=link).save()
 
     return HttpResponse()
