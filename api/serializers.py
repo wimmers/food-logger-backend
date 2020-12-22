@@ -1,21 +1,21 @@
 from django.contrib.auth.models import User, Group
-from api.models import Products, Product_To_Node
+from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
 from rest_framework import serializers
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['url', 'username', 'email', 'groups']
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['url', 'name']
 
 
-class ProductsSerializer(serializers.HyperlinkedModelSerializer):
+class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
         fields = ['id',
@@ -40,7 +40,24 @@ class ProductsSerializer(serializers.HyperlinkedModelSerializer):
                   ]
 
 
-class Product_To_NodeSerializer(serializers.HyperlinkedModelSerializer):
+class SpottedOnSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product_To_Node
-        fields = ['code', 'node']
+        model = SpottedOn
+        fields = ['day', 'product_node_link']
+
+
+class NotSpottedOnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotSpottedOn
+        fields = ['day', 'product_node_link']
+
+
+class ProductToNodeSerializer(serializers.ModelSerializer):
+    spotted_on = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field='day')
+    not_spotted_on = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field='day')
+
+    class Meta:
+        model = ProductToNode
+        fields = ['product', 'node', 'created', 'spotted_on', 'not_spotted_on']
