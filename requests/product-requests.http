@@ -1,0 +1,7 @@
+### Add single product from Open Food Facts to database by barcode
+POST {{baseUrl}}/post_single_product
+Content-Type: application/json
+
+{
+  "barcode" : 4000539213700
+}
