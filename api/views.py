@@ -145,11 +145,14 @@ def post_single_product(request):
     """
     expects a json body with "barcode" as single field
     """
-    barcode = json.loads(request.body.decode("utf-8")).get('barcode', '')
+    barcode = request.data.get('barcode')
     request = requests.get(
-        'https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json')
+        'https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json',
+        # TODO: adapt once we settle on name
+        headers={'User-Agent': 'Foodlogger - Webapp - Version 1.0 - www.???.org',
+                 'Content-Type': 'application/x-www-form-urlencoded'})
     if request.json()['status_verbose'] == 'product not found':
-        return HttpResponse('Product does not exist in Open Food Facts', status=404)
+        return HttpResponse('Product with this barcode does not exist in Open Food Facts', status=404)
 
     product = request.json()['product']
 
@@ -171,7 +174,7 @@ def post_single_product(request):
         Products.objects.create(**expected_fields)
 
         # print(Products.objects.filter(code=barcode).all().values())
-        return HttpResponse(status=201)
+        return HttpResponse('Added product ' + Products.objects.filter(code=barcode).get().product_name, status=201)
     else:
         return HttpResponse('Product already in database', status=409)
 
