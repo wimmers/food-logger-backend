@@ -79,6 +79,15 @@ def get_categories(request):
     return JsonResponse({"categories": list(categories)})
 
 
+def sort_by_field_string(entries, accessor):
+    categories_to_entries = {}
+    for entry in entries:
+        categories = [s.strip() for s in accessor(entry).split(',')]
+        for category in categories:
+            categories_to_entries.setdefault(category, set()).add(entry.id)
+    return categories_to_entries
+
+
 @api_view(["GET"])
 def get_products(request):
     """
@@ -86,19 +95,18 @@ def get_products(request):
     - a JSON of all products in our catalog
     - a list of categories
     """
-    queryset = Products.objects.all()
-    cheeses = queryset.filter(categories__contains='Cheeses')
-    wines = queryset.filter(categories__contains='Wines')
-    products = cheeses | wines
+    products = Products.objects.all()
     products_serialized = ProductsSerializer(products, many=True).data
-    category_results = []
-    for category in ["Cheeses", "Wines"]:
-        filtered = products.filter(categories__contains=category)
-        results = [product.id for product in filtered.all()]
-        category_results.append({'name': category, 'products': results})
+    categories_to_products = sort_by_field_string(
+        products, lambda x: x.categories)
+    category_results = [{'name': category, 'products': list(results)}
+                        for category, results in categories_to_products.items()]
+    brands_to_products = sort_by_field_string(products, lambda x: x.brands)
 
     return JsonResponse({
-        "products": products_serialized, "categories": category_results
+        "products": products_serialized,
+        "categories": category_results,
+        "brands": list(brands_to_products.keys())
     })
 
 
