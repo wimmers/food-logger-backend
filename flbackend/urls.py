@@ -36,6 +36,9 @@ urlpatterns = [
     path('filter_shops/', views.filter_shops),
     path('filter_products/', views.filter_products),
     path('post_single_product', views.post_single_product),
+    path('add_product/', views.add_product_to_shop),
+    path('confirm_product/', views.confirm_product_at_shop),
+    path('unconfirm_product/', views.unconfirm_product_at_shop),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/', admin.site.urls)
 ]

@@ -1,4 +1,5 @@
 # from api.models import Products
+from django.core.exceptions import ValidationError
 from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse, HttpResponse
@@ -78,6 +79,15 @@ def get_categories(request):
     return JsonResponse({"categories": list(categories)})
 
 
+def sort_by_field_string(entries, accessor):
+    categories_to_entries = {}
+    for entry in entries:
+        categories = [s.strip() for s in accessor(entry).split(',')]
+        for category in categories:
+            categories_to_entries.setdefault(category, set()).add(entry.id)
+    return categories_to_entries
+
+
 @api_view(["GET"])
 def get_products(request):
     """
@@ -85,19 +95,18 @@ def get_products(request):
     - a JSON of all products in our catalog
     - a list of categories
     """
-    queryset = Products.objects.all()
-    cheeses = queryset.filter(categories__contains='Cheeses')
-    wines = queryset.filter(categories__contains='Wines')
-    products = cheeses | wines
+    products = Products.objects.all()
     products_serialized = ProductsSerializer(products, many=True).data
-    category_results = []
-    for category in ["Cheeses", "Wines"]:
-        filtered = products.filter(categories__contains=category)
-        results = [product.id for product in filtered.all()]
-        category_results.append({'name': category, 'products': results})
+    categories_to_products = sort_by_field_string(
+        products, lambda x: x.categories)
+    category_results = [{'name': category, 'products': list(results)}
+                        for category, results in categories_to_products.items()]
+    brands_to_products = sort_by_field_string(products, lambda x: x.brands)
 
     return JsonResponse({
-        "products": products_serialized, "categories": category_results
+        "products": products_serialized,
+        "categories": category_results,
+        "brands": list(brands_to_products.keys())
     })
 
 
@@ -112,12 +121,8 @@ def filter_shops(request):
     """
     product_id = request.GET.get('product')
     node_ids = request.GET.get('nodes').split(',')
-    try:
-        code = Products.objects.get(id=product_id).code
-    except Products.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     entries = ProductToNode.objects.all().\
-        filter(code=code).\
+        filter(product=product_id).\
         filter(node__in=node_ids)
     result = [entry.node for entry in entries]
     return JsonResponse({
@@ -138,11 +143,8 @@ def filter_products(request):
     entries = ProductToNode.objects.all().\
         filter(node__in=node_ids).\
         distinct()
-    codes = list(entry.code for entry in entries)
-    products = Products.objects.filter(code__in=codes)
-    product_ids = [product.id for product in products]
     return JsonResponse({
-        'products': product_ids
+        'products': [entry.product.id for entry in entries]
     })
 
 
@@ -152,28 +154,92 @@ def post_single_product(request):
     expects a json body with "barcode" as single field
     """
     barcode = json.loads(request.body.decode("utf-8")).get('barcode', '')
-    request = requests.get('https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json')
+    request = requests.get(
+        'https://world.openfoodfacts.org/api/v0/product/' + str(barcode) + '.json')
     if request.json()['status_verbose'] == 'product not found':
         return HttpResponse('Product does not exist in Open Food Facts', status=404)
 
     product = request.json()['product']
 
     # for test purposes
-    #Products.objects.filter(code=barcode).delete()
+    # Products.objects.filter(code=barcode).delete()
 
     if not Products.objects.filter(code=barcode).exists():
 
-        list_of_fields = [field.get_attname_column()[1] for field in Products._meta.fields]
-        #list_of_fields.remove('id')
+        list_of_fields = [field.get_attname_column()[1]
+                          for field in Products._meta.fields]
+        # list_of_fields.remove('id')
 
         # remove all fields which are not part of our Products model
-        expected_fields = {key: product[key] for key in list_of_fields if key in product.keys()}
-        expected_fields['url'] = 'https://world.openfoodfacts.org/product/' + str(barcode)
+        expected_fields = {key: product[key]
+                           for key in list_of_fields if key in product.keys()}
+        expected_fields['url'] = 'https://world.openfoodfacts.org/product/' + \
+            str(barcode)
 
         Products.objects.create(**expected_fields)
 
-        #print(Products.objects.filter(code=barcode).all().values())
+        # print(Products.objects.filter(code=barcode).all().values())
         return HttpResponse(status=201)
     else:
         return HttpResponse('Product already in database', status=409)
 
+
+@api_view(["POST"])
+def add_product_to_shop(request):
+    """
+    Marks a new product as available at a shop.
+    Arguments (given as JSON):
+    - product: id of the product
+    - node: OSM id of the shop
+    """
+    data = request.data
+    serializer = ProductToNodeSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    return HttpResponse()
+
+
+def validate_spotted(attrs):
+    if 'product' not in attrs:
+        raise ValidationError("Missing field: 'product'")
+    if 'node' not in attrs:
+        raise ValidationError("Missing field: 'node'")
+    if not isinstance(attrs['product'], int):
+        raise ValidationError("Value error: 'product' must be 'int'")
+    if not isinstance(attrs['node'], int):
+        raise ValidationError("Value error: 'node' must be 'int'")
+
+
+@api_view(["POST"])
+def confirm_product_at_shop(request):
+    """
+    Confirms a new product as available at a shop.
+    Arguments (given as JSON):
+    - product: id of the product
+    - node: OSM id of the shop
+    """
+    data = request.data
+    validate_spotted(data)
+    link = ProductToNode.objects.get(
+        product=data['product'], node=data['node'])
+    SpottedOn(product_node_link=link).save()
+
+    return HttpResponse()
+
+
+@api_view(["POST"])
+def unconfirm_product_at_shop(request):
+    """
+    Unconfirms a new product as available at a shop.
+    Arguments (given as JSON):
+    - product: id of the product
+    - node: OSM id of the shop
+    """
+    data = request.data
+    validate_spotted(data)
+    link = ProductToNode.objects.get(
+        product=data['product'], node=data['node'])
+    NotSpottedOn(product_node_link=link).save()
+
+    return HttpResponse()
