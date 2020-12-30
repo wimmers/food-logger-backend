@@ -235,3 +235,13 @@ def unconfirm_product_at_shop(request):
     NotSpottedOn(product_node_link=link).save()
 
     return HttpResponse()
+
+@api_view(["DELETE"])
+def remove_product_to_node_link(request):
+    data = request.data
+    validate_spotted(data)
+    link = ProductToNode.objects.get(
+        product=data['product'], node=data['node'])
+    ProductToNode(product=link).delete()
+
+    return HttpResponse()
