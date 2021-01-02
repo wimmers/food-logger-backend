@@ -248,6 +248,6 @@ def remove_product_to_node_link(request):
     validate_spotted(data)
     link = ProductToNode.objects.get(
         product=data['product'], node=data['node'])
-    ProductToNode(product=link).delete()
+    link.delete()
 
     return HttpResponse()
