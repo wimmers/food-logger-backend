@@ -2,7 +2,7 @@
 from django.core.exceptions import ValidationError
 from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
 from django.contrib.auth.models import User, Group
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -241,3 +241,19 @@ def unconfirm_product_at_shop(request):
     NotSpottedOn(product_node_link=link).save()
 
     return HttpResponse()
+
+
+@api_view(["DELETE"])
+def remove_product_to_node_link(request):
+    data = request.data
+    validate_spotted(data)
+
+    try:
+        link = ProductToNode.objects.get(
+            product=data['product'], node=data['node'])
+        link.delete()
+
+    except ProductToNode.DoesNotExist:
+        return HttpResponseNotFound("Product to node entry not found.")
+
+    return HttpResponse("Deleted link.")

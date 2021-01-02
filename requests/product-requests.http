@@ -1,0 +1,8 @@
+### Delete product to node entry
+DELETE {{baseUrl}}/remove_product_to_node_link
+Content-Type: application/json
+
+{
+  "product": 2,
+  "node": 7933801341
+}
