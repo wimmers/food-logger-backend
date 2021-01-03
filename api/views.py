@@ -1,17 +1,19 @@
 # from api.models import Products
-from django.core.exceptions import ValidationError
-from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
-from django.contrib.auth.models import User, Group
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
-from rest_framework.decorators import api_view
-from rest_framework import viewsets
-from rest_framework import permissions
-from rest_framework import status
-from rest_framework.response import Response
-from api.serializers import UserSerializer, GroupSerializer,\
-    ProductsSerializer, ProductToNodeSerializer, SpottedOnSerializer, NotSpottedOnSerializer
-import requests
+import datetime
 import json
+
+import requests
+from django.contrib.auth.models import User, Group
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.utils import timezone
+from rest_framework import permissions
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
+
+from api.models import Products, ProductToNode, SpottedOn, NotSpottedOn
+from api.serializers import UserSerializer, GroupSerializer, \
+    ProductsSerializer, ProductToNodeSerializer, SpottedOnSerializer, NotSpottedOnSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -251,9 +253,13 @@ def remove_product_to_node_link(request):
     try:
         link = ProductToNode.objects.get(
             product=data['product'], node=data['node'])
-        link.delete()
+        link_id = link.id
 
     except ProductToNode.DoesNotExist:
         return HttpResponseNotFound("Product to node entry not found.")
 
-    return HttpResponse("Deleted link.")
+    if link.created > timezone.now() + datetime.timedelta(minutes=-5):
+        link.delete()
+        return HttpResponse("Deleted link with id " + str(link_id))
+    else:
+        return HttpResponseBadRequest("Time since link creation greater than 5 minutes.")
