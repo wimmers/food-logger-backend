@@ -1,0 +1,49 @@
+[
+  {
+    "Pflanzenmilch": [
+        "Pflanzenmilch", "Milchersatz",
+        "Getreidemilch", "Amaranthmilch", "Gerstemilch", "Buchweizenmilch", "Kanariengrasmilch", "Maismilch", "Hirsemilch", "Hafermilch", "Quinoamilch", "Reismilch", "Sesammilch"", Zwerghirsemilch", "Weizenmilch",
+        "Hülsenfruchtmilch", "Sojamilch",
+        "Nussmilch", "Mandelmilch", "Mandelmilch", "Kastanienmilch", "Haselnussmilch", "Macadamiamilch", "Walnussmilch"
+
+      ]
+  },
+  {
+    "Pflanzenkäse": ["Michfreie Käse", "Milchfreie Käse", "Veganer-käse", "Käse", "Frischkäse"]
+
+  },
+  {
+    "Vurst": ["Vegetarische Würste", "Vegane Wurst"]
+  },
+  {
+    "Fleischersatzprodukte": [
+      "Fleisch-Ersatzprodukte",
+      "Gemüsebratling", "Vegetarische Hamburger", "Vegetarische Nuggets", "Vegetarische Würste", "Gemüsehack"]
+  },
+  {
+    "Fischersatzprodukte": [
+      "Fisch und Meeresfrüchte", "Fisch", "Fischzubereitungen", "Panierte Fische", "Fischstäbchen", "Vegetarische-fischstäbchen", "Veganer Lachs"
+    ]
+  },
+  {
+    "Joghurtalternativen": ["Pflanzenbasierte Joghurts", "Sojajoghurt", "Joghurt", "Frucht-Soja-Joghurts", "Einfacher Soja-Joghurt"]
+  },
+  {
+    "Alkoholische Getränke":["Alkoholische Getränke","Weine", "Roteweine", "Italienische Weine", "Biere"]
+  },
+  {
+    "Brotaufstriche": ["Brotaufstriche"]
+  },
+  {
+    "Fertiggerichte" : ["Fertiggerichte",  "Pizzas", "Pizzen", "Tiefkühlpizza", "Instant-Nudeln", "Instant Nudelsuppen"]
+  },
+  {
+    "Saucen": ["Saucen"]
+  },
+  {
+    "Desserts": ["Desserts", "Speiseeis und Sorbets", "Speiseeis", "Milchfreie Nachtische", "Soja-Nachtische"]
+  },
+  {
+    "Kekse und Kuchen": ["Kekse und Kuchen", "Kekse", "Knusprige Waffeln", "Schokoladenkekse"]
+  }
+]
