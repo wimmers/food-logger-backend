@@ -11,6 +11,11 @@ Install Django and required libraries with `pip`:
 pip install -r requirements.txt
 ```
 
+Run migrations:
+```
+python manage.py migrate
+```
+
 Run the server:
 ```
 python manage.py runserver
