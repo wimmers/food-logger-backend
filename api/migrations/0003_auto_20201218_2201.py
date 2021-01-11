@@ -23,3 +23,5 @@ class Migration(migrations.Migration):
             new_name='SpottedOn',
         ),
     ]
+
+    atomic=False
